@@ -18,6 +18,7 @@ module.exports = function (passport) {
       }
 
       const didPasswordMatch = bycrypt.compareSync(password, foundUser.encryptedPassword);
+
       if (!didPasswordMatch) {
         next(null, false, { message: 'Incorrect username' });
         return;
@@ -39,7 +40,7 @@ module.exports = function (passport) {
         return;
       }
 
-      // Here is where we put in queries to display in every page using users data. 
+      // Here is where we put in queries to display in every page using users data.
 
       cb(null, userDocument);
     });
