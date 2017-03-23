@@ -5,9 +5,11 @@ const logger       = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser   = require('body-parser');
 const mongoose     = require('mongoose');
+const session      = require('express-session');
+const passport     = require('passport');
 
 
-mongoose.connect('mongodb://localhost/api-auth-express');
+// mongoose.connect('mongodb://localhost/api-auth-express');
 
 const app = express();
 
@@ -25,9 +27,32 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(layouts);
+// We do this before your routes:
+app.use(session({
+  secret: 'angular auth passport secret shh',
+  resave: true,
+  saveUninitialized: true,
+  cookie : { httpOnly: true, maxAge: 2419200000 }
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
-const index = require('./routes/index');
-app.use('/', index);
+// we can use this now for a seperate file.
+const passportSetup = require('./config/passport');
+passportSetup(passport);
+
+// const index = require('./routes/index');
+// app.use('/', index);
+
+// Is important to have this after the passport stuff.
+const authRoutes = require('./routes/auth-routes');
+app.use('/', authRoutes);
+
+// Adding middleware
+app.use((req, res, next) => {
+  res.sendfile(__dirname + '/public/index.html');
+});
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
